@@ -1,10 +1,14 @@
+import os
+from datetime import datetime as dt
+from sys import stdout
+
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import os
 
+OUT_DIR = 'out/'
 
 mb_size = 32
 X_dim = 784
@@ -46,7 +50,6 @@ D_b2 = tf.Variable(tf.zeros(shape=[1]))
 
 theta_D = [D_W1, D_W2, D_b1, D_b2]
 
-
 z = tf.placeholder(tf.float32, shape=[None, z_dim])
 
 G_W1 = tf.Variable(xavier_init([z_dim, h_dim]))
@@ -83,21 +86,28 @@ D_loss = tf.reduce_mean(D_real) - tf.reduce_mean(D_fake)
 G_loss = -tf.reduce_mean(D_fake)
 
 D_solver = (tf.train.RMSPropOptimizer(learning_rate=1e-4)
-            .minimize(-D_loss, var_list=theta_D))
+    .minimize(-D_loss, var_list=theta_D))
 G_solver = (tf.train.RMSPropOptimizer(learning_rate=1e-4)
-            .minimize(G_loss, var_list=theta_G))
+    .minimize(G_loss, var_list=theta_G))
 
 clip_D = [p.assign(tf.clip_by_value(p, -0.01, 0.01)) for p in theta_D]
 
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-if not os.path.exists('out/'):
-    os.makedirs('out/')
+if os.path.exists(OUT_DIR):
+    files = [f for f in os.listdir(OUT_DIR)]
+    for f in files:
+        os.remove(os.path.join(OUT_DIR, f))
+else:
+    os.makedirs(OUT_DIR)
 
 i = 0
 
-for it in range(1000000):
+log_file = open('out/log.txt', 'w+')
+cur_time = dt.now()
+
+for it in range(20001):
     for _ in range(5):
         X_mb, _ = mnist.train.next_batch(mb_size)
 
@@ -111,15 +121,16 @@ for it in range(1000000):
         feed_dict={z: sample_z(mb_size, z_dim)}
     )
 
-    if it % 100 == 0:
-        print('Iter: {}; D loss: {:.4}; G_loss: {:.4}'
-              .format(it, D_loss_curr, G_loss_curr))
+    if it % 1000 == 0:
+        for out in [log_file, stdout]:
+            print('Iter: {}; D loss: {:.4}; G_loss: {:.4}'
+                  .format(it, D_loss_curr, G_loss_curr), file=out, flush=True)
+        samples = sess.run(G_sample, feed_dict={z: sample_z(16, z_dim)})
 
-        if it % 1000 == 0:
-            samples = sess.run(G_sample, feed_dict={z: sample_z(16, z_dim)})
-
-            fig = plot(samples)
-            plt.savefig('out/{}.png'
-                        .format(str(i).zfill(3)), bbox_inches='tight')
-            i += 1
-            plt.close(fig)
+        fig = plot(samples)
+        plt.savefig('out/{}.png'
+                    .format(str(i).zfill(3)), bbox_inches='tight')
+        i += 1
+        plt.close(fig)
+for out in [log_file, stdout]:
+    print('Time: {} seconds'.format((dt.now() - cur_time).seconds), file=out, flush=True)

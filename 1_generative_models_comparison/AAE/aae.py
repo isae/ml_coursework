@@ -1,10 +1,14 @@
-import tensorflow as tf
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
 import os
+from sys import stdout
+
+import matplotlib.gridspec as gridspec
+import matplotlib.pyplot as plt
+import numpy as np
+import tensorflow as tf
+from datetime import datetime as dt
 from tensorflow.examples.tutorials.mnist import input_data
 
+OUT_DIR = 'out/'
 
 mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 mb_size = 32
@@ -115,12 +119,18 @@ G_solver = tf.train.AdamOptimizer().minimize(G_loss, var_list=theta_Q)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
-if not os.path.exists('out/'):
-    os.makedirs('out/')
+if os.path.exists(OUT_DIR):
+    files = [f for f in os.listdir(OUT_DIR)]
+    for f in files:
+        os.remove(os.path.join(OUT_DIR, f))
+else:
+    os.makedirs(OUT_DIR)
 
 i = 0
 
-for it in range(1000000):
+log_file = open('out/log.txt', 'w+')
+cur_time = dt.now()
+for it in range(20001):
     X_mb, _ = mnist.train.next_batch(mb_size)
     z_mb = np.random.randn(mb_size, z_dim)
 
@@ -129,8 +139,9 @@ for it in range(1000000):
     _, G_loss_curr = sess.run([G_solver, G_loss], feed_dict={X: X_mb})
 
     if it % 1000 == 0:
-        print('Iter: {}; D_loss: {:.4}; G_loss: {:.4}; Recon_loss: {:.4}'
-              .format(it, D_loss_curr, G_loss_curr, recon_loss_curr))
+        for out in [log_file, stdout]:
+            print('Iter: {}; D_loss: {:.4}; G_loss: {:.4}; Recon_loss: {:.4}'
+                  .format(it, D_loss_curr, G_loss_curr, recon_loss_curr), file=out, flush=True)
 
         samples = sess.run(X_samples, feed_dict={z: np.random.randn(16, z_dim)})
 
@@ -138,3 +149,6 @@ for it in range(1000000):
         plt.savefig('out/{}.png'.format(str(i).zfill(3)), bbox_inches='tight')
         i += 1
         plt.close(fig)
+
+for out in [log_file, stdout]:
+    print('Time: {} seconds'.format((dt.now() - cur_time).seconds), file=out, flush=True)
