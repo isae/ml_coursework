@@ -100,6 +100,18 @@ var condition6 = Infer(function(){
     var n2 = sample(properHouses)
     condition((n2["house"] == n1["house"] + 1) || (n2["house"] == n1["house"] - 1))
     condition(function(){
+        if (n1["house"] == 0 && n1["color"] == "green"){
+            return false
+        }
+        if (n2["house"] == 0 && n2["color"] == "green"){
+            return false
+        }
+        if (n1["house"] == 4 && n1["color"] == "ivory"){
+            return false
+        }
+        if (n2["house"] == 4 && n2["color"] == "ivory"){
+            return false
+        }
         if (n2["house"] == n1["house"] + 1 && n1["color"] == "ivory"){
             return n2["color"] == "green"
         } else if (n2["house"] == n1["house"] + 1 && n2["color"] == "green"){
