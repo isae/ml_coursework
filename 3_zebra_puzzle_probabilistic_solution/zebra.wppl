@@ -1,41 +1,41 @@
 var colors = {
-   0 : "red",
-   1 : "green",
-   2 : "ivory",
-   3 : "yellow",
-   4 : "blue"
+   "red" : 0,
+   "green" : 1,
+   "ivory" : 2,
+   "yellow" : 3,
+   "blue" : 4
 }
 
 var nationalities = {
-   0 : "england",
-   1 : "spain",
-   2 : "ukraine",
-   3 : "norway",
-   4 : "japan"
+   "england" : 0,
+   "spain" : 1,
+   "ukraine" : 2,
+   "norway" : 3,
+   "japan" : 4
 }
 
 var pets = {
-    0 : "dog",
-    1 : "snail",
-    2 : "fox",
-    3 : "horse",
-    4 : "zebra"
+    "dog" : 0,
+    "snail" : 1,
+    "fox" : 2,
+    "horse" : 3,
+    "zebra" : 4
 }
 
 var cigarettes = {
-    0 : "old_gold",
-    1 : "kools",
-    2 : "chesterfield",
-    3 : "lucky_strike",
-    4 : "parliament"
+    "old_gold" : 0,
+    "kools" : 1,
+    "chesterfield" : 2,
+    "lucky_strike" : 3,
+    "parliament" : 4
 }
 
 var drinks = {
-    0 : "coffee",
-    1 : "tea",
-    2 : "milk",
-    3 : "juice",
-    4 : "water"
+    "coffee" : 0,
+    "tea" : 1,
+    "milk" : 2,
+    "juice" : 3,
+    "water" : 4
 }
 
 var mustBe = function(whenApplicable, toCheck){
@@ -59,48 +59,60 @@ var nextTo = function(house, checkForHouse){
 }
 
 var getOne = function(){
-    return sample(RandomInteger({n: 5}))
+    return sample()
+}
+
+var unique = function(arr){
+    return sort(arr) == [0,1,2,3,4]
 }
 
 var model = function () {
+  var rand =  RandomInteger({n: 5})
   /* 1. There are five houses in a row, each of a different color
      and inhabited by men of different nationalities,
      with different pets, drinks, and cigarettes. */
-  var house = getOne()
-  var color = colors[getOne()]
-  var nat = nationalities[getOne()]
-  var pet = pets[getOne()]
-  var cig = cigarettes[getOne()]
-  var drink = drinks[getOne()]
+  var color = [sample(rand), sample(rand), sample(rand), sample(rand), sample(rand)]
+  var nat = [sample(rand), sample(rand), sample(rand), sample(rand), sample(rand)]
+  var pet = [sample(rand), sample(rand), sample(rand), sample(rand), sample(rand)]
+  var cig = [sample(rand), sample(rand), sample(rand), sample(rand), sample(rand)]
+  var drink = [sample(rand), sample(rand), sample(rand), sample(rand), sample(rand)]
+  condition(unique(color))
+  condition(unique(nat))
+  condition(unique(pet))
+  condition(unique(cig))
+  condition(unique(drink))
   // 2. The Englishman lives in the red house.
-  condition(mustBe(nat == "england", color == "red"))
+  condition(nat[nationalities["england"]] == color[colors["red"]])
   // 3. The Spaniard owns a dog.
-  condition(mustBe(nat == "spain", pet == "dog"))
+  condition(nat[nationalities["spain"]] == pet[pets["dog"]])
   // 4. Coffee is drunk in the green house.
-  condition(mustBe(drink == "coffee", color == "green"))
+  condition(drink[drinks["coffee"]] == color[colors["green"]])
   // 5. The Ukrainian drinks tea.
-  condition(mustBe(nat == "ukraine", drink == "tea"))
+  condition(nat[nationalities["ukraine"]] == drink[drinks["tea"]])
   // 6. The green house is directly to the right of the ivory house.
-  condition(mustBe(color == "green", house != 0 && color[house - 1] == "ivory" ))
+  condition(mustBe(color[colors["green"]] != 0, color[colors["green"]] == color[colors["ivory"]] + 1))
   // 7. The Old Gold smoker owns snails.
-  condition(mustBe(cig == "old_gold", pet == "snail"))
+  condition(cig[cigarettes["old_gold"]] == pet[pets["snail"]])
   // 8. Kools are being smoked in the yellow house.
-  condition(mustBe(cig == "kools", color == "yellow"))
+  condition(cig[cigarettes["kools"]] == color[colors["yellow"]])
   //  9. Milk is drunk in the middle house.
-  condition(mustBe(house == 2, drink == "milk"))
+  condition(drink[drinks["milk"]] == 2)
   // 10. The Norwegian lives in the first house on the left.
-  condition(mustBe(house == 0, nat == "norway"))
+  condition(nat[nationalities["norway"]] == 0)
   // 11. The Chesterfield smoker lives next to the fox owner.
-  condition(mustBe(cig == "chesterfield", nextTo(house, function(ng){ pet[ng] == "fox"})))
+  condition(mustBe(cig[cigarettes["chesterfield"]] != 0,  cig[cigarettes["chesterfield"]] == pet[pets["fox"]] + 1))
+  condition(mustBe(cig[cigarettes["chesterfield"]] != 4,  cig[cigarettes["chesterfield"]] == pet[pets["fox"]] - 1))
   // 12. Kools are smoked in the house next to the house where the horse is kept.
-  condition(mustBe(cig == "kools", nextTo(house, function(ng){ pet[ng] == "horse" })))
+  condition(mustBe(cig[cigarettes["kools"]]!= 0,  cig[cigarettes["kools"]] == pet[pets["horse"]] + 1))
+  condition(mustBe(cig[cigarettes["kools"]]!= 4,  cig[cigarettes["kools"]] == pet[pets["horse"]] - 1))
   // 13. The Lucky Strike smoker drinks orange juice.
-  condition(mustBe(cig == "lucky_strike", drink == "juice"))
+  condition(cig[cigarettes["lucky_strike"]] == drink[drinks["juice"]])
   // 14. The Japanese smokes Parliaments.
-  condition(mustBe(nat == "japan", cig == "parliament"))
+  condition(nat[nationalities["japan"]] == cig[cigarettes["parliament"]])
   // 15. The Norwegian lives next to the blue house.
-  condition(mustBe(nat == "norway", nextTo(house, function(ng){ color[ng] == "blue" })))
-  return house+ " ; " + color + " ; " + nat + " ; " + drink + " ; " + cig + " ; "  + pet
+  condition(mustBe(nat[nationalities["norway"]]!= 0,  nat[nationalities["norway"]] == color[colors["blue"]] + 1))
+  condition(mustBe(nat[nationalities["norway"]]!= 4,  nat[nationalities["norway"]] == color[colors["blue"]] - 1))
+  return color+ "\n" + nat + "\n" + drink + "\n" + cig + "\n"  + pet
 };
 var dist = Infer(model)
 viz(dist)
