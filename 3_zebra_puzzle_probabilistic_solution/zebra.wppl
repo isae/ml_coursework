@@ -104,12 +104,16 @@ var condition6 = Infer(function(){
 var condition11 = Infer(function(){
     var n1 = sample(condition6)
     var n2 = sample(condition6)
-    condition((n1["house"] == n2["house"] + 1) || (n2["house"] == n1["house"] + 1))
+    condition(n2["house"] == n1["house"] + 1)
     condition(function(){
         if (n1["cig"] == "chesterfield"){
             return n2["pet"] == "fox"
-        } else if (n2["cig"] == "chesterfield"){
+        } else if (n1["pet"] == "fox"){
+            return n2["cig"] == "chesterfield"
+        } if (n2["cig"] == "chesterfield"){
             return n1["pet"] == "fox"
+        } else if (n2["pet"] == "fox"){
+            return n1["cig"] == "chesterfield"
         } else {
             return true
         }
@@ -122,16 +126,21 @@ var condition11 = Infer(function(){
 var condition12 = Infer(function(){
     var n1 = sample(condition11)
     var n2 = sample(condition11)
-    condition((n1["house"] == n2["house"] + 1) || (n2["house"] == n1["house"] + 1))
+    condition(n2["house"] == n1["house"] + 1)
     condition(function(){
         if (n1["cig"] == "kools"){
             return n2["pet"] == "horse"
-        } else if (n2["cig"] == "kools"){
+        } else if (n1["pet"] == "horse"){
+            return n2["cig"] == "kools"
+        } if (n2["cig"] == "kools"){
             return n1["pet"] == "horse"
+        } else if (n2["pet"] == "horse"){
+            return n1["cig"] == "kools"
         } else {
             return true
         }
     }())
+    display(n1["house"] + " "+n1["cig"]+ " "+ n1["pet"] + " " + n2["house"] + " "+n2["cig"]+" "+n2["pet"])
     return n1
 })
 
@@ -140,12 +149,16 @@ var condition12 = Infer(function(){
 var condition15 = Infer(function(){
     var n1 = sample(condition12)
     var n2 = sample(condition12)
-    condition((n1["house"] == n2["house"] + 1) || (n2["house"] == n1["house"] + 1))
+    condition(n2["house"] == n1["house"] + 1)
     condition(function(){
-        if (n1["nat"] == "norway"){
+         if (n1["nat"] == "norway"){
             return n2["color"] == "blue"
-        } else if (n2["nat"] == "norway"){
+        } else if (n1["color"] == "blue"){
+            return n2["nat"] == "norway"
+        } if (n2["nat"] == "norway"){
             return n1["color"] == "blue"
+        } else if (n2["color"] == "blue"){
+            return n1["nat"] == "norway"
         } else {
             return true
         }
