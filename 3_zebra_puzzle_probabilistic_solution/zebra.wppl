@@ -57,6 +57,10 @@ var getHouse = function(house, color, nat, drink, cig, pet){
     }
 }
 
+var toStr = function(obj){
+    return "("+obj["house"] + ", "+ obj["color"]+", "+ obj["nat"]+", "+obj["drink"]+", "+ obj["cig"] + ", "+ obj["pet"]+")"
+}
+
 var properHouses = Infer(function () {
   /* 1. There are five houses in a row, each of a different color
      and inhabited by men of different nationalities,
@@ -92,11 +96,20 @@ var properHouses = Infer(function () {
 
 // 6. The green house is directly to the right of the ivory house.
 var condition6 = Infer(function(){
-    var leftHouse = sample(properHouses)
-    var rightHouse = sample(properHouses)
-    condition(rightHouse["house"] == leftHouse["house"] + 1)
-    condition(mustBe(rightHouse["color"] == "green", leftHouse["color"] == "ivory"))
-    return leftHouse
+    var n1 = sample(properHouses)
+    var n2 = sample(properHouses)
+    condition((n2["house"] == n1["house"] + 1) || (n2["house"] == n1["house"] - 1))
+    condition(function(){
+        if (n2["house"] == n1["house"] + 1 && n1["color"] == "ivory"){
+            return n2["color"] == "green"
+        } else if (n2["house"] == n1["house"] + 1 && n2["color"] == "green"){
+            return n1["color"] == "ivory"
+        } else {
+            return true
+        }
+    }())
+    //display(toStr(n1) + " " + toStr(n2))
+    return n1
 })
 
 
@@ -104,7 +117,7 @@ var condition6 = Infer(function(){
 var condition11 = Infer(function(){
     var n1 = sample(condition6)
     var n2 = sample(condition6)
-    condition(n2["house"] == n1["house"] + 1)
+    condition((n2["house"] == n1["house"] + 1) || (n2["house"] == n1["house"] - 1))
     condition(function(){
         if (n1["cig"] == "chesterfield"){
             return n2["pet"] == "fox"
@@ -126,7 +139,7 @@ var condition11 = Infer(function(){
 var condition12 = Infer(function(){
     var n1 = sample(condition11)
     var n2 = sample(condition11)
-    condition(n2["house"] == n1["house"] + 1)
+    condition((n2["house"] == n1["house"] + 1) || (n2["house"] == n1["house"] - 1))
     condition(function(){
         if (n1["cig"] == "kools"){
             return n2["pet"] == "horse"
@@ -140,7 +153,7 @@ var condition12 = Infer(function(){
             return true
         }
     }())
-    display(n1["house"] + " "+n1["cig"]+ " "+ n1["pet"] + " " + n2["house"] + " "+n2["cig"]+" "+n2["pet"])
+    //display(JSON.stringify(n1) + " " + JSON.stringify(n2))
     return n1
 })
 
@@ -149,7 +162,7 @@ var condition12 = Infer(function(){
 var condition15 = Infer(function(){
     var n1 = sample(condition12)
     var n2 = sample(condition12)
-    condition(n2["house"] == n1["house"] + 1)
+    condition((n2["house"] == n1["house"] + 1) || (n2["house"] == n1["house"] - 1))
     condition(function(){
          if (n1["nat"] == "norway"){
             return n2["color"] == "blue"
@@ -163,6 +176,7 @@ var condition15 = Infer(function(){
             return true
         }
     }())
+    //display(JSON.stringify(n1) + " " + JSON.stringify(n2))
     return JSON.stringify(n1)
 })
 viz(condition15)
