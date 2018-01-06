@@ -1,0 +1,70 @@
+var colors = {
+   0 : "red",
+   1 : "green",
+   2 : "ivory",
+   3 : "yellow",
+   4 : "blue"
+}
+
+var nationalities = {
+   0 : "england",
+   1 : "spain",
+   2 : "ukraine",
+   3 : "norway",
+   4 : "japan"
+}
+
+var pets = {
+    0 : "dog",
+    1 : "snail",
+    2 : "fox",
+    3 : "horse",
+    4 : "zebra"
+}
+
+var sigarettes = {
+    0 : "old_gold",
+    1 : "kools",
+    2 : "chesterfield",
+    3 : "lucky_strike",
+    4 : "parliament"
+}
+
+var drinks = {
+    0 : "coffee",
+    1 : "tea",
+    2 : "milk",
+    3 : "juice",
+    4 : "water"
+}
+
+var mustBe = function(whenApplicable, toCheck){
+  if(whenApplicable){
+    return toCheck
+  } else {
+    return true
+  }
+}
+
+var getOne = function(){
+    return sample(RandomInteger({n: 5}))
+}
+
+var model = function () {
+  /* 1. There are five houses in a row, each of a different color
+     and inhabited by men of different nationalities,
+     with different pets, drinks, and cigarettes. */
+  var house = getOne()
+  var color = colors[getOne()]
+  var nat = nationalities[getOne()]
+  var pet = pets[getOne()]
+  // 2. The Englishman lives in the red house.
+  condition(mustBe(nat == "england", color == "red"))
+  // 3. The Spaniard owns a dog.
+  condition(mustBe(nat == "spain", pet == "dog"))
+  // 10. The Norwegian lives in the first house on the left.
+  condition(mustBe(house == 0, nat == "norway"))
+  return house+" ; "+nat+" ; "+color + " ; " + pet
+};
+var dist = Infer({method: 'enumerate'}, model)
+viz(dist)
