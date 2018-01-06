@@ -22,7 +22,7 @@ var pets = {
     4 : "zebra"
 }
 
-var sigarettes = {
+var cigarettes = {
     0 : "old_gold",
     1 : "kools",
     2 : "chesterfield",
@@ -39,11 +39,19 @@ var drinks = {
 }
 
 var mustBe = function(whenApplicable, toCheck){
-  if(whenApplicable){
-    return toCheck
-  } else {
-    return true
-  }
+    return whenApplicable ? toCheck : true
+}
+
+var toTheLeft = function(house, checkForHouse){
+    return mustBe(house != 0, checkForHouse(house-1))
+}
+
+var toTheRight = function(house, checkForHouse){
+    return mustBe(house != 4, checkForHouse(house+1))
+}
+
+var nextTo = function(house, checkForHouse){
+   return toTheLeft(house, checkForHouse) || toTheRight(house, checkForHouse)
 }
 
 var getOne = function(){
@@ -58,13 +66,37 @@ var model = function () {
   var color = colors[getOne()]
   var nat = nationalities[getOne()]
   var pet = pets[getOne()]
+  var cig = cigarettes[getOne()]
+  var drink = drinks[getOne()]
   // 2. The Englishman lives in the red house.
   condition(mustBe(nat == "england", color == "red"))
   // 3. The Spaniard owns a dog.
   condition(mustBe(nat == "spain", pet == "dog"))
+  // 4. Coffee is drunk in the green house.
+  condition(mustBe(drink == "coffee", color == "green"))
+  // 5. The Ukrainian drinks tea.
+  condition(mustBe(nat == "ukraine", drink == "tea"))
+  // 6. The green house is directly to the right of the ivory house.
+  //condition(mustBe(color == "green", toTheLeft(house, function(ng){ color[ng] == "ivory" })))
+  // 7. The Old Gold smoker owns snails.
+  condition(mustBe(cig == "old_gold", pet == "snail"))
+  // 8. Kools are being smoked in the yellow house.
+  condition(mustBe(cig == "kools", color == "yellow"))
+  //  9. Milk is drunk in the middle house.
+  condition(mustBe(house == 2, drink == "milk"))
   // 10. The Norwegian lives in the first house on the left.
   condition(mustBe(house == 0, nat == "norway"))
-  return house+" ; "+nat+" ; "+color + " ; " + pet
+  // 11. The Chesterfield smoker lives next to the fox owner.
+  //condition(mustBe(cig == "chesterfield", nextTo(house, function(ng){ pet[ng] == "fox"})))
+  // 12. Kools are smoked in the house next to the house where the horse is kept.
+  ///condition(mustBe(cig == "kools", nextTo(house, function(ng){ pet[ng] == "horse" })))
+  // 13. The Lucky Strike smoker drinks orange juice.
+  condition(mustBe(cig == "lucky_strike", drink == "juice"))
+  // 14. The Japanese smokes Parliaments.
+  condition(mustBe(nat == "japan", cig == "parliament"))
+  // 15. The Norwegian lives next to the blue house.
+  //condition(mustBe(nat == "norway", nextTo(house, function(ng){ color[ng] == "blue" })))
+  return house+" ; " + color + " ; " + nat + " ; " + pet + " ; " + cig + " ; " + drink
 };
 var dist = Infer({method: 'enumerate'}, model)
 viz(dist)
