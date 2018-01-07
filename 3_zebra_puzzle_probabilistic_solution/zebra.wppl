@@ -61,7 +61,16 @@ var toStr = function(obj){
     return "("+obj["house"] + ", "+ obj["color"]+", "+ obj["nat"]+", "+obj["drink"]+", "+ obj["cig"] + ", "+ obj["pet"]+")"
 }
 
-var applyCommonConditions = function(house, color, nat, drink, cig, pet){
+var properHouses = Infer(function () {
+  /* 1. There are five houses in a row, each of a different color
+     and inhabited by men of different nationalities,
+     with different pets, drinks, and cigarettes. */
+  var house = getOne()
+  var color = colors[getOne()]
+  var nat = nationalities[getOne()]
+  var pet = pets[getOne()]
+  var cig = cigarettes[getOne()]
+  var drink = drinks[getOne()]
   // 2. The Englishman lives in the red house.
   condition(mustBe(nat == "england", color == "red"))
   // 3. The Spaniard owns a dog.
@@ -82,75 +91,23 @@ var applyCommonConditions = function(house, color, nat, drink, cig, pet){
   condition(mustBe(cig == "lucky_strike", drink == "juice"))
   // 14. The Japanese smokes Parliaments.
   condition(mustBe(nat == "japan", cig == "parliament"))
-}
 
-var getHouseDistrib = function(house){
-    return Infer(function () {
-      /* 1. There are five houses in a row, each of a different color
-         and inhabited by men of different nationalities,
-         with different pets, drinks, and cigarettes. */
-      var color = colors[getOne()]
-      var nat = nationalities[getOne()]
-      var pet = pets[getOne()]
-      var cig = cigarettes[getOne()]
-      var drink = drinks[getOne()]
-      applyCommonConditions(house, color, nat, drink, cig, pet)
-      return getHouse(house, color, nat, drink, cig, pet)
-    })
-}
+  // The green house is immediately to the right of the ivory house.
+  // Derivation from condition 6
+  condition(!(house == 0 && color == "green"))
+  condition(!(house == 4 && color == "ivory"))
+  // derivation from condition 11
+  condition(!(cig == "chesterfield" && pet == "fox"))
+  // derivation from condition 12
+  condition(!(cig == "kools" && pet == "horse"))
+  // derivation from condition 15
+  condition(!(nat == "norway" && color == "blue"))
+  // derivation from conditions 10 and 15
+  condition(mustBe(house == 1, color == "blue"))
+  // derivation from conditions 1, 15, 10, 6
+  condition(mustBe(house == 0, color == "yellow"))
 
-var house0Distrib = getHouseDistrib(0)
-var house1Distrib = getHouseDistrib(1)
-var house2Distrib = getHouseDistrib(2)
-var house3Distrib = getHouseDistrib(3)
-var house4Distrib = getHouseDistrib(4)
-
-var toTheLeft = function(houses, i, thisToCheck, leftToCheck){
-    if(i == 0){
-        return false
-    }
-    if(thisToCheck(houses[i])){
-        return leftToCheck(houses[i-1])
-    }
-    return true
-}
-
-var toTheRight = function(houses, i, thisToCheck, rightToCheck){
-    if(i == 4){
-        return false
-    }
-    if(thisToCheck(houses[i])){
-        return rightToCheck(houses[i+1])
-    }
-    return true
-}
-
-var nextTo = function(houses, i, thisToCheck, neighborToCheck){
-    return toTheLeft(houses, i, thisToCheck, neighborToCheck) || toTheRight(houses, i, thisToCheck, neighborToCheck)
-}
-
-var orderConditions = function(houses){
-    var checker = function(i, unused) {
-        return toTheRight(houses, i, function(hs) { return hs["color"] == "ivory"; }, function(hs) { return hs["color"] == "green"; })
-        && nextTo(houses, i, function(hs) { return hs["cig"] == "chesterfield"; }, function(hs) { return hs["pet"] == "fox"; })
-        && nextTo(houses, i, function(hs) { return hs["cig"] == "kools"; }, function(hs) { return hs["pet"] == "horse"; })
-        && nextTo(houses, i, function(hs) { return hs["nat"] == "norway"; }, function(hs) { return hs["color"] == "blue"; })
-    };
-    var okHouses = mapIndexed(checker, houses)
-    display(okHouses)
-    return any(function(bool) { return bool == false; }, okHouses);
-}
-
-var orderCheckDistrib = Infer(function () {
-      var houses = [
-        sample(house0Distrib),
-        sample(house1Distrib),
-        sample(house2Distrib),
-        sample(house3Distrib),
-        sample(house4Distrib)
-      ]
-      condition(orderConditions(houses))
-      return JSON.stringify(houses)
+  return toStr(getHouse(house, color, nat, drink, cig, pet))
 })
 
-viz(orderCheckDistrib)
+viz(properHouses)
