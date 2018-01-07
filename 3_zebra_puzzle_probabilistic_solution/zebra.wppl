@@ -55,9 +55,9 @@ var properHouses = Infer({"model": function () {
   // 10. The Norwegian lives in the first house on the left.
   //condition(nat[nationalities["norway"]] == 0)
   // 11. The Chesterfield smoker lives next to the fox owner.
-  condition(Math.abs(cig[cigarettes["chesterfield"]] - pet[pets["fox"]]) == 1)
+  //condition(Math.abs(cig[cigarettes["chesterfield"]] - pet[pets["fox"]]) == 1)
   // 12. Kools are smoked in the house next to the house where the horse is kept.
-  condition(Math.abs(cig[cigarettes["kools"]] - pet[pets["horse"]]) == 1)
+  //condition(Math.abs(cig[cigarettes["kools"]] - pet[pets["horse"]]) == 1)
   // 13. The Lucky Strike smoker drinks orange juice.
   condition(cig[cigarettes["lucky_strike"]] == drink[drinks["juice"]])
   // 14. The Japanese smokes Parliaments.
@@ -65,19 +65,26 @@ var properHouses = Infer({"model": function () {
   // 15. The Norwegian lives next to the blue house.
   condition(nat[nationalities["norway"]] == color[colors["blue"]])
   var getAnswerForHouse = function(x){
-    return {
-        house : x,
-        color : colors_rev[color.indexOf(x)],
-        nat: nationalities_rev[nat.indexOf(x)],
-        pet : pets_rev[pet.indexOf(x)],
-        cig : cigarettes_rev[cig.indexOf(x)],
-        drink : drinks_rev[drink.indexOf(x)]
-    }
+    return ""+x+color.indexOf(x)+nat.indexOf(x)+pet.indexOf(x)+cig.indexOf(x)+drink.indexOf(x)
   }
-  return JSON.stringify(map(getAnswerForHouse, [0,1,2,3,4]))
-}, method: 'MCMC', samples: 20000})
+  var concat = function(x, acc) { return x + acc; }
+  return reduce(concat, "", map(getAnswerForHouse, [0,1,2,3,4]))
+}, method: 'MCMC', samples: 20000, verbose: true})
 
-var result = JSON.parse(sample(properHouses))
+var code = sample(properHouses)
+display(code)
+var listOfCodes = [code.slice(0,6),code.slice(6,12), code.slice(12,18), code.slice(18,24), code.slice(24,30)]
+var result = map(function(x){
+    return {
+        house : x[0],
+        color : colors_rev[x[1]],
+        nationality : nationalities_rev[x[2]],
+        pet : pets_rev[x[3]],
+        cig : cigarettes_rev[x[4]],
+        drink : drinks_rev[x[5]],
+        original_code: x
+    }
+}, listOfCodes)
 display(JSON.stringify(result, null, 2))
 //viz(properHouses)
 var after = Date.now()
