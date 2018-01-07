@@ -1,70 +1,23 @@
-var colors = {
-   0 : "red",
-   1 : "green",
-   2 : "ivory",
-   3 : "yellow",
-   4 : "blue"
-}
-
-var nationalities = {
-   0 : "england",
-   1 : "spain",
-   2 : "ukraine",
-   3 : "norway",
-   4 : "japan"
-}
-
-var pets = {
-    0 : "dog",
-    1 : "snail",
-    2 : "fox",
-    3 : "horse",
-    4 : "zebra"
-}
-
-var cigarettes = {
-    0 : "old_gold",
-    1 : "kools",
-    2 : "chesterfield",
-    3 : "lucky_strike",
-    4 : "parliament"
-}
-
-var drinks = {
-    0 : "coffee",
-    1 : "tea",
-    2 : "milk",
-    3 : "juice",
-    4 : "water"
-}
+var colors = {0 : "red", 1 : "green", 2 : "ivory", 3 : "yellow", 4 : "blue" }
+var nationalities = {0 : "england", 1 : "spain", 2 : "ukraine", 3 : "norway", 4 : "japan"}
+var pets = {0 : "dog", 1 : "snail", 2 : "fox", 3 : "horse", 4 : "zebra"}
+var cigarettes = {0 : "old_gold", 1 : "kools", 2 : "chesterfield", 3 : "lucky_strike", 4 : "parliament"}
+var drinks = {0 : "coffee", 1 : "tea", 2 : "milk", 3 : "juice", 4 : "water"}
 
 var mustBe = function(whenApplicable, toCheck){
-    return whenApplicable == toCheck
+  return whenApplicable == toCheck
 }
 
 var getOne = function(){
-    return sample(RandomInteger({n: 5}))
+  return sample(RandomInteger({n: 5}))
 }
 
-var getHouse = function(house, color, nat, drink, cig, pet){
-    return {
-        "house" : house,
-        "color" : color,
-        "nat"   : nat,
-        "drink" : drink,
-        "cig"   : cig,
-        "pet"   : pet
-    }
-}
+// Fisher–Yates shuffle
+var randomShuffle = function(array){
 
-var toStr = function(obj){
-    return "("+obj["house"] + ", "+ obj["color"]+", "+ obj["nat"]+", "+obj["drink"]+", "+ obj["cig"] + ", "+ obj["pet"]+")"
 }
 
 var properHouses = Infer(function () {
-  /* 1. There are five houses in a row, each of a different color
-     and inhabited by men of different nationalities,
-     with different pets, drinks, and cigarettes. */
   var house = getOne()
   var color = colors[getOne()]
   var nat = nationalities[getOne()]
@@ -92,22 +45,7 @@ var properHouses = Infer(function () {
   // 14. The Japanese smokes Parliaments.
   condition(mustBe(nat == "japan", cig == "parliament"))
 
-  // The green house is immediately to the right of the ivory house.
-  // Derivation from condition 6
-  condition(!(house == 0 && color == "green"))
-  condition(!(house == 4 && color == "ivory"))
-  // derivation from condition 11
-  condition(!(cig == "chesterfield" && pet == "fox"))
-  // derivation from condition 12
-  condition(!(cig == "kools" && pet == "horse"))
-  // derivation from condition 15
-  condition(!(nat == "norway" && color == "blue"))
-  // derivation from conditions 10 and 15
-  condition(mustBe(house == 1, color == "blue"))
-  // derivation from conditions 1, 15, 10, 6
-  condition(mustBe(house == 0, color == "yellow"))
-
-  return toStr(getHouse(house, color, nat, drink, cig, pet))
+  return "("+house + ", "+ color+", "+ nat+","+drink+", "+ cig + ", "+ pet+")"
 })
 
 viz(properHouses)
