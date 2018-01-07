@@ -24,12 +24,12 @@ var randomShuffle = function(array){
 }
 
 var before = Date.now()
+
 var properHouses = Infer({"model": function () {
-  /*
-    1. There are five houses in a row, each of a different color
-     and inhabited by men of different nationalities,
-     with different pets, drinks, and cigarettes.
-  */
+
+  // 1. There are five houses in a row, each of a different color
+  // and inhabited by men of different nationalities,
+  //with different pets, drinks, and cigarettes.
   var color = randomShuffle([0,1,2,3,4])
   var nat = randomShuffle([0,1,2,3,4])
   var pet = randomShuffle([0,1,2,3,4])
@@ -44,10 +44,10 @@ var properHouses = Infer({"model": function () {
   // 5. The Ukrainian drinks tea.
   condition(nat[nationalities.ukraine] == drink[drinks.tea])
   // 6. The green house is directly to the right of the ivory house.
+  condition(color[colors["green"]] == color[colors["ivory"]] + 1)
   //display("Green house: "+ color[colors["green"]] + "; Ivory house: "+ color[colors["ivory"]])
-  //condition(color[colors["green"]] == color[colors["ivory"]] + 1)
   // 7. The Old Gold smoker owns snails.
-  //condition(cig[cigarettes["old_gold"]] == pet[pets["snail"]])
+  condition(cig[cigarettes["old_gold"]] == pet[pets["snail"]])
   // 8. Kools are being smoked in the yellow house.
   //condition(cig[cigarettes["kools"]] == color[colors["yellow"]])
   // 9. Milk is drunk in the middle house.
@@ -55,15 +55,15 @@ var properHouses = Infer({"model": function () {
   // 10. The Norwegian lives in the first house on the left.
   //condition(nat[nationalities["norway"]] == 0)
   // 11. The Chesterfield smoker lives next to the fox owner.
-  //condition(Math.abs(cig[cigarettes["chesterfield"]] - pet[pets["fox"]]) == 1)
+  condition(Math.abs(cig[cigarettes["chesterfield"]] - pet[pets["fox"]]) == 1)
   // 12. Kools are smoked in the house next to the house where the horse is kept.
-  //condition(Math.abs(cig[cigarettes["kools"]] - pet[pets["horse"]]) == 1)
+  condition(Math.abs(cig[cigarettes["kools"]] - pet[pets["horse"]]) == 1)
   // 13. The Lucky Strike smoker drinks orange juice.
-  //condition(cig[cigarettes["lucky_strike"]] == drink[drinks["juice"]])
+  condition(cig[cigarettes["lucky_strike"]] == drink[drinks["juice"]])
   // 14. The Japanese smokes Parliaments.
-  //condition(nat[nationalities["japan"]] == cig[cigarettes["parliament"]])
+  condition(nat[nationalities["japan"]] == cig[cigarettes["parliament"]])
   // 15. The Norwegian lives next to the blue house.
-  //condition(nat[nationalities["norway"]] == color[colors["blue"]])
+  condition(nat[nationalities["norway"]] == color[colors["blue"]])
   var getAnswerForHouse = function(x){
     return {
         house : x,
@@ -74,9 +74,11 @@ var properHouses = Infer({"model": function () {
         drink : drinks_rev[drink.indexOf(x)]
     }
   }
-  return map(getAnswerForHouse, [0,1,2,3,4])
-}, method: 'MCMC', samples: 1000, lag: 100, burn: 5})
+  return JSON.stringify(map(getAnswerForHouse, [0,1,2,3,4]))
+}, method: 'MCMC', samples: 20000})
 
-viz.table(properHouses, {destructure: true, log: true})
+var result = JSON.parse(sample(properHouses))
+display(JSON.stringify(result, null, 2))
+//viz(properHouses)
 var after = Date.now()
 display("Time taken: "+(after - before)/1000+ " seconds")
