@@ -61,10 +61,6 @@ var toStr = function(obj){
     return "("+obj["house"] + ", "+ obj["color"]+", "+ obj["nat"]+", "+obj["drink"]+", "+ obj["cig"] + ", "+ obj["pet"]+")"
 }
 
-var assertNeighbours = function(n1, n2){
-    condition((n2["house"] == n1["house"] + 1) || (n2["house"] == n1["house"] - 1))
-}
-
 var properHouses = Infer(function () {
   /* 1. There are five houses in a row, each of a different color
      and inhabited by men of different nationalities,
@@ -96,7 +92,8 @@ var properHouses = Infer(function () {
   // 14. The Japanese smokes Parliaments.
   condition(mustBe(nat == "japan", cig == "parliament"))
 
-  // derivation from condition 6
+  // The green house is immediately to the right of the ivory house.
+  // Derivation from condition 6
   condition(!(house == 0 && color == "green"))
   condition(!(house == 4 && color == "ivory"))
   // derivation from condition 11
@@ -105,94 +102,12 @@ var properHouses = Infer(function () {
   condition(!(cig == "kools" && pet == "horse"))
   // derivation from condition 15
   condition(!(nat == "norway" && color == "blue"))
+  // derivation from conditions 10 and 15
+  condition(mustBe(house == 1, color == "blue"))
+  // derivation from conditions 1, 15, 10, 6
+  condition(mustBe(house == 0, color == "yellow"))
 
-  return getHouse(house, color, nat, drink, cig, pet)
+  return toStr(getHouse(house, color, nat, drink, cig, pet))
 })
 
-// 6. The green house is directly to the right of the ivory house.
-var condition6 = Infer(function(){
-    var n1 = sample(properHouses)
-    var n2 = sample(properHouses)
-    assertNeighbours(n1, n2)
-    var left = (n2["house"] == n1["house"] + 1) ? n1 : n2
-    var right = (n2["house"] == n1["house"] + 1) ? n2 : n1
-    condition((left["color"] == "ivory") == (right["color"] == "green"))
-    //display(toStr(n1) + " " + toStr(n2))
-    return n1
-})
-
-
-// 11. The Chesterfield smoker lives next to the fox owner.
-var condition11 = Infer(function(){
-    var n1 = sample(condition6)
-    var n2 = sample(condition6)
-    assertNeighbours(n1, n2)
-    condition(function(){
-        if (n1["cig"] == "chesterfield"){
-            return n2["pet"] == "fox"
-        }
-        if (n1["pet"] == "fox"){
-            return n2["cig"] == "chesterfield"
-        }
-        if (n2["cig"] == "chesterfield"){
-            return n1["pet"] == "fox"
-        }
-        if (n2["pet"] == "fox"){
-            return n1["cig"] == "chesterfield"
-        }
-        return true
-    }())
-    //display(toStr(n1) + " " + toStr(n2))
-    return n1
-})
-
-
-// 12. Kools are smoked in the house next to the house where the horse is kept.
-var condition12 = Infer(function(){
-    var n1 = sample(condition11)
-    var n2 = sample(condition11)
-    assertNeighbours(n1, n2)
-    condition(function(){
-        if (n1["cig"] == "kools"){
-            return n2["pet"] == "horse"
-        }
-        if (n1["pet"] == "horse"){
-            return n2["cig"] == "kools"
-        }
-        if (n2["cig"] == "kools"){
-            return n1["pet"] == "horse"
-        }
-        if (n2["pet"] == "horse"){
-            return n1["cig"] == "kools"
-        }
-        return true
-    }())
-    //display(JSON.stringify(n1) + " " + JSON.stringify(n2))
-    return n1
-})
-
-
-// 15. The Norwegian lives next to the blue house.
-var condition15 = Infer(function(){
-    var n1 = sample(condition12)
-    var n2 = sample(condition12)
-    assertNeighbours(n1, n2)
-    condition(function(){
-        if (n1["nat"] == "norway"){
-            return n2["color"] == "blue"
-        }
-        if (n1["color"] == "blue"){
-            return n2["nat"] == "norway"
-        }
-        if (n2["nat"] == "norway"){
-            return n1["color"] == "blue"
-        }
-        if (n2["color"] == "blue"){
-            return n1["nat"] == "norway"
-        }
-        return true
-    }())
-    //display(JSON.stringify(n1) + " " + JSON.stringify(n2))
-    return toStr(n1)
-})
-viz(condition15)
+viz(properHouses)
