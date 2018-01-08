@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
-from util.util import plot, xavier_init
+from util.util import plot
 
 OUT_DIR = 'out/'
 
@@ -25,14 +25,16 @@ lr = 1e-3
 X = tf.placeholder(tf.float32, shape=[None, X_dim])
 z = tf.placeholder(tf.float32, shape=[None, z_dim])
 
-Q_W1 = tf.Variable(xavier_init([X_dim, h_dim]))
-Q_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
+xavier = tf.contrib.layers.xavier_initializer()
+zeros = tf.zeros_initializer()
+Q_W1 = tf.get_variable("Q_W1", [X_dim, h_dim], initializer=xavier)
+Q_b1 = tf.get_variable("Q_b1", [h_dim], initializer=zeros)
 
-Q_W2_mu = tf.Variable(xavier_init([h_dim, z_dim]))
-Q_b2_mu = tf.Variable(tf.zeros(shape=[z_dim]))
+Q_W2_mu = tf.get_variable("Q_W2_mu", [h_dim, z_dim], initializer=xavier)
+Q_b2_mu = tf.get_variable("Q_b2_mu", [z_dim], initializer=zeros)
 
-Q_W2_sigma = tf.Variable(xavier_init([h_dim, z_dim]))
-Q_b2_sigma = tf.Variable(tf.zeros(shape=[z_dim]))
+Q_W2_sigma = tf.get_variable("Q_W2_sigma", [h_dim, z_dim], initializer=xavier)
+Q_b2_sigma = tf.get_variable("Q_b2_sigma", [z_dim], initializer=zeros)
 
 
 def Q(X):
@@ -49,11 +51,11 @@ def sample_z(mu, log_var):
 
 # =============================== P(X|z) ======================================
 
-P_W1 = tf.Variable(xavier_init([z_dim, h_dim]))
-P_b1 = tf.Variable(tf.zeros(shape=[h_dim]))
+P_W1 = tf.get_variable("P_W1", [z_dim, h_dim], initializer=xavier)
+P_b1 = tf.get_variable("P_b1", [h_dim], initializer=zeros)
 
-P_W2 = tf.Variable(xavier_init([h_dim, X_dim]))
-P_b2 = tf.Variable(tf.zeros(shape=[X_dim]))
+P_W2 = tf.get_variable("P_W2", [h_dim, X_dim], initializer=xavier)
+P_b2 = tf.get_variable("P_b2", [X_dim], initializer=zeros)
 
 
 def P(z):
@@ -95,6 +97,7 @@ i = 0
 
 log_file = open('out/log.txt', 'w+')
 cur_time = dt.now()
+testSamples = np.random.randn(16, z_dim)
 for it in range(20001):
     X_mb, _ = mnist.train.next_batch(mb_size)
 
@@ -105,7 +108,7 @@ for it in range(20001):
             print('Iter: {}; Loss: {:.4};'
                   .format(it, loss), file=out, flush=True)
 
-        samples = sess.run(X_samples, feed_dict={z: np.random.randn(16, z_dim)})
+        samples = sess.run(X_samples, feed_dict={z: testSamples})
 
         fig = plot(samples)
         plt.savefig('out/{}.png'.format(str(i).zfill(3)), bbox_inches='tight')

@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
-from util.util import plot
+from util.util import plot, xavier_init
 
 OUT_DIR = 'out/'
 
