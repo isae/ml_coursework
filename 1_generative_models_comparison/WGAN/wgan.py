@@ -2,11 +2,12 @@ import os
 from datetime import datetime as dt
 from sys import stdout
 
-import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
+
+from util.util import plot, xavier_init
 
 OUT_DIR = 'out/'
 
@@ -16,29 +17,6 @@ z_dim = 10
 h_dim = 128
 
 mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
-
-
-def plot(samples):
-    fig = plt.figure(figsize=(4, 4))
-    gs = gridspec.GridSpec(4, 4)
-    gs.update(wspace=0.05, hspace=0.05)
-
-    for i, sample in enumerate(samples):
-        ax = plt.subplot(gs[i])
-        plt.axis('off')
-        ax.set_xticklabels([])
-        ax.set_yticklabels([])
-        ax.set_aspect('equal')
-        plt.imshow(sample.reshape(28, 28), cmap='Greys_r')
-
-    return fig
-
-
-def xavier_init(size):
-    in_dim = size[0]
-    xavier_stddev = 1. / tf.sqrt(in_dim / 2.)
-    return tf.random_normal(shape=size, stddev=xavier_stddev)
-
 
 X = tf.placeholder(tf.float32, shape=[None, X_dim])
 
