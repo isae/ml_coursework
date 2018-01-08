@@ -1,23 +1,18 @@
 var colors = {"yellow" : 0, "blue" : 1, "red" : 2, "ivory" : 3, "green" : 4 }
-var colors_rev = {0 : "yellow", 1 : "blue", 2 : "red", 3 : "ivory", 4 : "green" }
 var nationalities = {"norway" : 0, "ukraine" : 1, "england" : 2, "spain" : 3, "japan" : 4}
-var nationalities_rev = {0 : "norway", 1 : "ukraine", 2 : "england", 3 : "spain", 4 : "japan"}
 var drinks = {"water" : 0, "tea" : 1, "milk" : 2, "juice" : 3, "coffee" : 4}
-var drinks_rev = {0 : "water", 1 : "tea", 2 : "milk", 3 : "juice", 4 : "coffee"}
 var cigarettes = {"kools" : 0, "chesterfield" : 1, "old_gold" : 2,  "lucky_strike" : 3, "parliament" : 4}
-var cigarettes_rev = {0 : "kools", 1 : "chesterfield", 2 : "old_gold",  3 : "lucky_strike", 4 : "parliament"}
 var pets = {"fox" : 0, "horse" : 1, "snail" : 2, "dog" : 3, "zebra" : 4}
-var pets_rev = {0 : "fox", 1 : "horse", 2 : "snail", 3 : "dog", 4 : "zebra"}
 
-var getRandomGen = mem(function(maxValue){
-    return RandomInteger({n: maxValue})
-})
+var searchByIndex = function(obj, i){
+    return filter(function(e){ return e[1] == i}, Object.entries(obj))[0][0]
+}
 
 var randomShuffle = function(array){
     if (array.length == 1) {
         return array
     }
-    var random = sample(getRandomGen(array.length))
+    var random = sample(RandomInteger({n: array.length}))
     var value = array[random]
     var remaining = remove(value, array)
     return [value].concat(randomShuffle(remaining))
@@ -25,8 +20,6 @@ var randomShuffle = function(array){
 
 var before = Date.now()
 var properHouses = Infer({"model": function () {
-
-
   // 1. There are five houses in a row, each of a different color
   // and inhabited by men of different nationalities,
   //with different pets, drinks, and cigarettes.
@@ -36,13 +29,13 @@ var properHouses = Infer({"model": function () {
   var cig = randomShuffle([0,1,2,3,4])
   var drink = randomShuffle([0,1,2,3,4])
   // 2. The Englishman lives in the red house.
-  condition(nat[nationalities.england] == color[colors.red])
+  condition(nat[nationalities["england"]] == color[colors["red"]])
   // 3. The Spaniard owns a dog.
-  condition(nat[nationalities.spain] == pet[pets.dog])
+  condition(nat[nationalities["spain"]] == pet[pets["dog"]])
   // 4. Coffee is drunk in the green house.
-  condition(drink[drinks.coffee] == color[colors.green])
+  condition(drink[drinks["coffee"]] == color[colors["green"]])
   // 5. The Ukrainian drinks tea.
-  condition(nat[nationalities.ukraine] == drink[drinks.tea])
+  condition(nat[nationalities["ukraine"]] == drink[drinks["tea"]])
   // 6. The green house is directly to the right of the ivory house.
   condition(color[colors["green"]] == color[colors["ivory"]] + 1)
   // 7. The Old Gold smoker owns snails.
@@ -66,18 +59,16 @@ var properHouses = Infer({"model": function () {
   var getAnswerForHouse = function(x){
     return {
         house : x,
-        color : colors_rev[color.indexOf(x)],
-        nat: nationalities_rev[nat.indexOf(x)],
-        drink : drinks_rev[drink.indexOf(x)],
-        cig : cigarettes_rev[cig.indexOf(x)],
-        pet : pets_rev[pet.indexOf(x)]
+        color : searchByIndex(colors, color.indexOf(x)),
+        nat: searchByIndex(nationalities, nat.indexOf(x)),
+        drink : searchByIndex(drinks, drink.indexOf(x)),
+        cig : searchByIndex(cigarettes, cig.indexOf(x)),
+        pet : searchByIndex(pets, pet.indexOf(x))
     }
   }
-  return JSON.stringify(map(getAnswerForHouse, [0,1,2,3,4]))
+  return JSON.stringify(map(getAnswerForHouse, [0,1,2,3,4]), null, 2)
 }, method: 'enumerate'})
 
-var result = JSON.parse(sample(properHouses))
-display(JSON.stringify(result, null, 2))
-//viz(properHouses)
+display(sample(properHouses))
 var after = Date.now()
 display("Time taken: "+(after - before)/1000+ " seconds")
