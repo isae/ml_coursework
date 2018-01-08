@@ -9,7 +9,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 from util.util import plot
 
-OUT_DIR = 'out/'
+OUT_DIR = 'no_norm/'
 
 mnist = input_data.read_data_sets('../../MNIST_data', one_hot=True)
 mb_size = 64
@@ -95,7 +95,7 @@ else:
 
 i = 0
 
-log_file = open('out/log.txt', 'w+')
+log_file = open('{}log.txt'.format(OUT_DIR), 'w+')
 cur_time = dt.now()
 testSamples = np.random.randn(16, z_dim)
 for it in range(20001):
@@ -111,7 +111,7 @@ for it in range(20001):
         samples = sess.run(X_samples, feed_dict={z: testSamples})
 
         fig = plot(samples)
-        plt.savefig('out/{}.png'.format(str(i).zfill(3)), bbox_inches='tight')
+        plt.savefig('{}{}.png'.format(OUT_DIR, str(i).zfill(3)), bbox_inches='tight')
         i += 1
         plt.close(fig)
 
