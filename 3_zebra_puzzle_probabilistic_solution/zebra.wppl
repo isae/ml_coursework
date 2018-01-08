@@ -1,13 +1,13 @@
-var colors = {"red" : 0, "green" : 1, "ivory" : 2, "yellow" : 3, "blue" : 4 }
-var colors_rev = {0 : "red", 1 : "green", 2 : "ivory", 3 : "yellow", 4 : "blue" }
-var nationalities = {"england" : 0, "spain" : 1, "ukraine" : 2, "norway" : 3, "japan" : 4}
-var nationalities_rev = {0 : "england", 1 : "spain", 2 : "ukraine", 3 : "norway", 4 : "japan"}
-var pets = {"dog" : 0, "snail" : 1, "fox" : 2, "horse" : 3, "zebra" : 4}
-var pets_rev = {0 : "dog", 1 : "snail", 2 : "fox", 3 : "horse", 4 : "zebra"}
-var cigarettes = {"old_gold" : 0, "kools" : 1, "chesterfield" : 2, "lucky_strike" : 3, "parliament" : 4}
-var cigarettes_rev = {0 : "old_gold", 1 : "kools", 2 : "chesterfield", 3 : "lucky_strike", 4 : "parliament"}
-var drinks = {"coffee" : 0, "tea" : 1, "milk" : 2, "juice" : 3, "water" : 4}
-var drinks_rev = {0 : "coffee", 1 : "tea", 2 : "milk", 3 : "juice", 4 : "water"}
+var colors = {"yellow" : 0, "blue" : 1, "red" : 2, "ivory" : 3, "green" : 4 }
+var colors_rev = {0 : "yellow", 1 : "blue", 2 : "red", 3 : "ivory", 4 : "green" }
+var nationalities = {"norway" : 0, "ukraine" : 1, "england" : 2, "spain" : 3, "japan" : 4}
+var nationalities_rev = {0 : "norway", 1 : "ukraine", 2 : "england", 3 : "spain", 4 : "japan"}
+var drinks = {"water" : 0, "tea" : 1, "milk" : 2, "juice" : 3, "coffee" : 4}
+var drinks_rev = {0 : "water", 1 : "tea", 2 : "milk", 3 : "juice", 4 : "coffee"}
+var cigarettes = {"kools" : 0, "chesterfield" : 1, "old_gold" : 2,  "lucky_strike" : 3, "parliament" : 4}
+var cigarettes_rev = {0 : "kools", 1 : "chesterfield", 2 : "old_gold",  3 : "lucky_strike", 4 : "parliament"}
+var pets = {"fox" : 0, "horse" : 1, "snail" : 2, "dog" : 3, "zebra" : 4}
+var pets_rev = {0 : "fox", 1 : "horse", 2 : "snail", 3 : "dog", 4 : "zebra"}
 
 var getRandomGen = mem(function(maxValue){
     return RandomInteger({n: maxValue})
@@ -24,8 +24,8 @@ var randomShuffle = function(array){
 }
 
 var before = Date.now()
-
 var properHouses = Infer({"model": function () {
+
 
   // 1. There are five houses in a row, each of a different color
   // and inhabited by men of different nationalities,
@@ -45,15 +45,14 @@ var properHouses = Infer({"model": function () {
   condition(nat[nationalities.ukraine] == drink[drinks.tea])
   // 6. The green house is directly to the right of the ivory house.
   condition(color[colors["green"]] == color[colors["ivory"]] + 1)
-  //display("Green house: "+ color[colors["green"]] + "; Ivory house: "+ color[colors["ivory"]])
   // 7. The Old Gold smoker owns snails.
   condition(cig[cigarettes["old_gold"]] == pet[pets["snail"]])
   // 8. Kools are being smoked in the yellow house.
-  //condition(cig[cigarettes["kools"]] == color[colors["yellow"]])
+  condition(cig[cigarettes["kools"]] == color[colors["yellow"]])
   // 9. Milk is drunk in the middle house.
-  //condition(drink[drinks["tea"]] == 2)
+  condition(drink[drinks["milk"]] == 2)
   // 10. The Norwegian lives in the first house on the left.
-  //condition(nat[nationalities["norway"]] == 0)
+  condition(nat[nationalities["norway"]] == 0)
   // 11. The Chesterfield smoker lives next to the fox owner.
   condition(Math.abs(cig[cigarettes["chesterfield"]] - pet[pets["fox"]]) == 1)
   // 12. Kools are smoked in the house next to the house where the horse is kept.
@@ -63,19 +62,19 @@ var properHouses = Infer({"model": function () {
   // 14. The Japanese smokes Parliaments.
   condition(nat[nationalities["japan"]] == cig[cigarettes["parliament"]])
   // 15. The Norwegian lives next to the blue house.
-  condition(nat[nationalities["norway"]] == color[colors["blue"]])
+  condition(Math.abs(nat[nationalities["norway"]] - color[colors["blue"]]) == 1)
   var getAnswerForHouse = function(x){
     return {
         house : x,
         color : colors_rev[color.indexOf(x)],
         nat: nationalities_rev[nat.indexOf(x)],
-        pet : pets_rev[pet.indexOf(x)],
+        drink : drinks_rev[drink.indexOf(x)],
         cig : cigarettes_rev[cig.indexOf(x)],
-        drink : drinks_rev[drink.indexOf(x)]
+        pet : pets_rev[pet.indexOf(x)]
     }
   }
   return JSON.stringify(map(getAnswerForHouse, [0,1,2,3,4]))
-}, method: 'MCMC', samples: 20000})
+}, method: 'enumerate'})
 
 var result = JSON.parse(sample(properHouses))
 display(JSON.stringify(result, null, 2))
