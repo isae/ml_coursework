@@ -97,7 +97,6 @@ i = 0
 
 log_file = open('{}log.txt'.format(OUT_DIR), 'w+')
 cur_time = dt.now()
-testSamples = np.random.randn(16, z_dim)
 for it in range(20001):
     X_mb, _ = mnist.train.next_batch(mb_size)
 
@@ -108,7 +107,7 @@ for it in range(20001):
             print('Iter: {}; Loss: {:.4};'
                   .format(it, loss), file=out, flush=True)
 
-        samples = sess.run(X_samples, feed_dict={z: testSamples})
+        samples = sess.run(X_samples, feed_dict={z: np.random.randn(16, z_dim)})
 
         fig = plot(samples)
         plt.savefig('{}{}.png'.format(OUT_DIR, str(i).zfill(3)), bbox_inches='tight')
